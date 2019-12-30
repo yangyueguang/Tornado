@@ -1,0 +1,8 @@
+urllib
+tornado
+redis
+socket
+urlparse
+colorama
+numpy
+curses
