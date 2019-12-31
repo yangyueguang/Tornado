@@ -17,7 +17,7 @@ def start():
     application = Application()
     http_server = httpserver.HTTPServer(application)
     http_server.listen(conf.TORNADO_LISTEN_PORT)
-    http_server.start(0)
+    # http_server.start(0)
     ioloop.IOLoop.instance().start()
 
 

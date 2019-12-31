@@ -4,10 +4,18 @@
 import os
 
 
-TORNADO_LISTEN_PORT = 8081
+TORNADO_LISTEN_PORT = 8082
 CURRENT_PATH = os.path.dirname(os.path.abspath(__file__))
 LOG_PATH = os.path.join(CURRENT_PATH, '../scripts')
-
+LOGIN_HOST = 'http://127.0.0.1:15107'
+RELOGIN_INTERVAL = 300
+EXCEL_PATH = ''
+# user info
+USER_INFO = {
+    'username': 'admin',
+    'password': 'mgZjRYeQVi',
+    'token': ''
+}
 # redis conf
 REDIS_CONF = {
     'host': "127.0.0.1",

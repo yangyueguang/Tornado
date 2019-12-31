@@ -4,11 +4,13 @@
 import time, os, stat
 import traceback
 import urllib
+import asyncio
+from utils.manager import extract, translate_response
 from tornado import gen, iostream
 from .base import BaseHandler
 from service.xnet import XRequest
 from functools import wraps
-from utils.Dlog import logger
+from utils.dlog import logger
 
 
 def is_login(func):
@@ -24,7 +26,7 @@ def is_login(func):
 
 
 class SyncTestHandler(BaseHandler):
-    def get(self):
+    def post(self):
         try:
             time.sleep(10)
             self.send_status_message(1, u'sync request finished, during 10s sleep.')
@@ -35,14 +37,16 @@ class SyncTestHandler(BaseHandler):
 
 class AsyncTestHandler(BaseHandler):
     @gen.coroutine
-    def get(self):
+    def post(self):
         try:
-            yield gen.sleep(10)
+            # yield gen.sleep(10)
+            asyncio.events
             self.send_status_message(1, u'Async request finished, during 10s sleep.')
             return
         except Exception as e:
             logger.error(traceback.format_exc())
-
+def sdal():
+    pass
 
 class UserLoginHandler(BaseHandler):
     @gen.coroutine
@@ -119,3 +123,13 @@ class AsyncDownloadHandler(BaseHandler):
         stat_result = os.stat(file_path)
         content_size = stat_result[stat.ST_SIZE]
         return content_size
+
+
+# pdf 抽取
+class Extract(BaseHandler):
+    @gen.coroutine
+    def post(self):
+        params = urllib.parse.urlencode(self.get_json())
+        res = extract(params.get('file'), params.get('docType', 27))
+        result = translate_response(res)
+        self.send_json(result)

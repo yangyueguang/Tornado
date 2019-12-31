@@ -6,3 +6,4 @@ urlparse
 colorama
 numpy
 curses
+requests
