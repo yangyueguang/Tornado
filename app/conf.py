@@ -3,18 +3,22 @@
 
 import os
 
+def full_url(host, port):
+    real_host = os.getenv(host, '100.100.21.163')
+    real_port = os.getenv(port, '15107')
+    return 'http://{}:{}'.format(real_host, real_port)
 
-TORNADO_LISTEN_PORT = 8082
+
+TORNADO_LISTEN_PORT = os.getenv('LISTEN_PORT', 8000)
 CURRENT_PATH = os.path.dirname(os.path.abspath(__file__))
-LOG_PATH = os.path.join(CURRENT_PATH, '../scripts')
-LOGIN_HOST = 'http://127.0.0.1:15107'
+LOG_PATH = os.path.join(CURRENT_PATH, 'static')
+LOGIN_HOST = full_url('EXTRACT_HOST', 'EXTRACT_PORT')
 RELOGIN_INTERVAL = 300
-EXCEL_PATH = ''
+EXCEL_PATH = LOG_PATH
 # user info
 USER_INFO = {
     'username': 'admin',
     'password': 'mgZjRYeQVi',
-    'token': ''
 }
 # redis conf
 REDIS_CONF = {

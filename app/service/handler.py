@@ -3,6 +3,7 @@
 
 import time, os, stat
 import traceback
+import conf
 import urllib
 import asyncio
 from utils.manager import extract, translate_response
@@ -39,21 +40,19 @@ class AsyncTestHandler(BaseHandler):
     @gen.coroutine
     def post(self):
         try:
-            # yield gen.sleep(10)
-            asyncio.events
+            yield gen.sleep(10)
+            # asyncio.events
             self.send_status_message(1, u'Async request finished, during 10s sleep.')
             return
         except Exception as e:
             logger.error(traceback.format_exc())
-def sdal():
-    pass
 
 class UserLoginHandler(BaseHandler):
     @gen.coroutine
     def post(self):
         try:
             user_service = XRequest()
-            params = urllib.parse.urlencode(self.get_json())
+            params = urllib.parse.urlencode(self.body())
             if not params:
                 self.send_status_message(1, u'get params error!')
                 return
@@ -129,7 +128,15 @@ class AsyncDownloadHandler(BaseHandler):
 class Extract(BaseHandler):
     @gen.coroutine
     def post(self):
-        params = urllib.parse.urlencode(self.get_json())
-        res = extract(params.get('file'), params.get('docType', 27))
+        request_file = self.request.files.get('file', None)
+        if not request_file:
+            self.send_status_message(301, 'file param is required!')
+            return
+        file_name = os.path.join(conf.EXCEL_PATH, request_file[0]['filename'])
+        file_body = request_file[0]['body']
+        docType = self.body.docType if self.body.docType else '27'
+        with open(file_name, 'wb') as f:
+            f.write(file_body)
+        res = extract(file_name, int(docType))
         result = translate_response(res)
         self.send_json(result)

@@ -20,7 +20,7 @@ class BaseHandler(web.RequestHandler):
     def get_redis_user(self, sid):
         try:
             # TODO demo test. if the request has sid(session id) return
-            if sid: return {'username': 'jianzhihua', 'passwd': 'passwd123'}
+            if sid: return {'username': 'xxx', 'passwd': '123'}
             user = self.redisdb.get(sid)
             return json.loads(user) if user else {}
         except Exception as e:
@@ -35,12 +35,13 @@ class BaseHandler(web.RequestHandler):
     def send_json(self, jsonobj):
         self.write(jsonobj)
 
-    def get_json(self):
-        try:
-            return json.loads(self.request.body)
-        except Exception as e:
-            logging.error(traceback.format_exc())
-            return None
+    @property
+    def body(self):
+        bodys = {}
+        self.request.files
+        for i in self.request.body_arguments:
+            bodys.update({i: self.get_body_argument(i, None)})
+        return Dict(bodys)
 
     def send_status_message_data(self, status, message, data):
         self.ret['status'] = status

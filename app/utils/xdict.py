@@ -6,7 +6,7 @@ class Dict(dict):
     def __init__(self, sdict={}):
         super(dict, self).__init__()
         if sdict is not None:
-            for sk, sv in sdict.iteritems():
+            for sk, sv in sdict.items():
                 if isinstance(sv, dict):
                     self[sk] = Dict(sv)
                 else:
@@ -17,6 +17,6 @@ class Dict(dict):
         try:
             return default if name not in self and default is not None else self[name]
         except KeyError:
-            raise AttributeError(name)
-
+            # raise AttributeError(name)
+            return None
 
