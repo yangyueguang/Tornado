@@ -11,8 +11,10 @@ function build_docker() {
 }
 
 function run_docker() {
-  docker run -d --env EXTRACT_HOST=100.100.21.163 --env EXTRACT_PORT=15107 --device=app/static:/app/static -p 8000:8000  --restart=always --name=output_extract $image_path
-
+  docker run -d --env EXTRACT_HOST=100.100.21.163 --env EXTRACT_PORT=15107 -v ~/Desktop/tornado/app/static:/app/static -p 8000:8000  --restart=always --name=output_extract $image_path
+}
+function clear_docker() {
+    docker container prune -f
 }
 function push_docker() {
   docker push ${image_path}
