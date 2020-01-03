@@ -76,7 +76,7 @@ def translate_response(res):
             sheet = workbook.create_sheet(table_item['table_name'])
             for row, item in enumerate(data):
                 for col, value in enumerate(item):
-                    sheet.cell(row, col).value = value
+                    sheet.cell(row + 1, col + 1).value = value
         elif item.tag_id not in ignore_tags:
             real_word = item.ppr if item.ppr else item.word
             extract_item = {
@@ -104,6 +104,6 @@ def xls_save(data, file_name, sheet_name):
     sheet = workbook.add_sheet(sheet_name)
     for row, item in enumerate(data):
         for col, value in enumerate(item):
-            sheet.write(row, col, value)
+            sheet.write(row + 1, col + 1, value)
     workbook.save(file_name)
 
