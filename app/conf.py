@@ -4,8 +4,8 @@
 import os
 
 def full_url(host, port):
-    real_host = os.getenv(host, '100.100.21.163')
-    real_port = os.getenv(port, '15107')
+    real_host = os.getenv(host, 'idps2-gtja.datagrand.cn')
+    real_port = os.getenv(port, '80')
     return 'http://{}:{}'.format(real_host, real_port)
 
 

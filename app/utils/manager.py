@@ -65,7 +65,7 @@ def translate_response(res):
         return {}
     tables = []
     extracts = []
-    tables_tags = [32, 33, 34, 37]
+    tables_tags = [2, 32, 33, 34, 37, 38, 39]
     ignore_tags = [3, 4, 5, 6, 7]
     pdf_file_path = json_result['pdf_path']
     pdf_path, pdf_name = os.path.split(pdf_file_path)
@@ -76,11 +76,13 @@ def translate_response(res):
         if item.tag_id in tables_tags:
             table_item = json.loads(item.ppr, encoding='utf-8')
             data = table_item['text_matrix']
-            excel_path = '%s%s.xls' % (pdf_file_path, table_item['table_name'])
+            excel_name = field_config.get(str(item.tag_id), table_item.get('table_name', ''))
+            excel_path = '%s%s.xls' % (pdf_file_path, excel_name)
             table_item['excel_path'] = excel_path
-            xls_save(data, excel_path, table_item['table_name'])
+            table_item['table_name'] = excel_name
+            xls_save(data, excel_path, excel_name)
             tables.append(table_item)
-            sheet = workbook.create_sheet(table_item['table_name'])
+            sheet = workbook.create_sheet(excel_name)
             for row, item in enumerate(data):
                 for col, value in enumerate(item):
                     sheet.cell(row + 1, col + 1).value = value
