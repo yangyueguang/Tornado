@@ -7,6 +7,7 @@ services:
       - 8082:8082
     volumes:
       - ../app/static:/app/static
+      - ../app/static/field_config.json:/app/static/field_config.json
     environment:
       - EXTRACT_HOST=100.100.21.163
       - EXTRACT_PORT=15107

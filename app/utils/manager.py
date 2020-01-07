@@ -53,6 +53,13 @@ def extract(input_file, doc_type_id):
 
 
 def translate_response(res):
+    field_config = {}
+    aaa = os.path.abspath(__file__)
+    try:
+        with open('utils/field_config.json', 'r') as f:
+            field_config = json.loads(f.read())
+    except:
+        logger.info('field_config read error')
     json_result = res.get('result', {})
     if not json_result:
         return {}
@@ -81,6 +88,7 @@ def translate_response(res):
             real_word = item.ppr if item.ppr else item.word
             extract_item = {
                 "terms_id": item.terms_id,
+                "terms_name": field_config.get(str(item.terms_id), ''),
                 "word": real_word
             }
             extracts.append(extract_item)
