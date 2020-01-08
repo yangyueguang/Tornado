@@ -1,8 +1,9 @@
-urllib
 tornado
 redis
-socket
-urlparse
 colorama
 numpy
-curses
+requests
+xlwt
+xlsxwriter
+chardet
+openpyxl

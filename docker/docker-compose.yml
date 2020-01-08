@@ -1,0 +1,15 @@
+version: '3'
+services:
+  output_extract:
+    image: dockerhub.datagrand.com/idps/output_extract:2020010320
+    restart: always
+    ports:
+      - 8082:8082
+    volumes:
+      - ../app/static:/app/static
+      - ../app/static/field_config.json:/app/static/field_config.json
+    environment:
+      - EXTRACT_HOST=100.100.21.163
+      - EXTRACT_PORT=15107
+      - LISTEN_PORT=8082
+
