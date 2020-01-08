@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # coding=utf-8
-# author:liuyoumin@datagrand.com
-# datetime:2019/4/23 下午17:05
-from __future__ import unicode_literals
+# author: Super
+# email: 2829969299@qq.com
 import requests
 import time
 from utils.xdict import Dict
@@ -69,7 +68,7 @@ def translate_response(res):
     ignore_tags = [3, 4, 5, 6, 7]
     pdf_file_path = json_result['pdf_path']
     pdf_path, pdf_name = os.path.split(pdf_file_path)
-    pdf_file_path = os.path.join(conf.EXCEL_PATH, pdf_name)
+    pdf_file_path = os.path.join(conf.STATIC_PATH, pdf_name)
     workbook = Workbook()
     for i in json_result['tag_list']:
         item = Dict(i)

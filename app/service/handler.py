@@ -132,7 +132,7 @@ class Extract(BaseHandler):
         if not request_file:
             self.send_status_message(301, 'file param is required!')
             return
-        file_name = os.path.join(conf.EXCEL_PATH, request_file[0]['filename'])
+        file_name = os.path.join(conf.STATIC_PATH, request_file[0]['filename'])
         file_body = request_file[0]['body']
         docType = self.body.docType if self.body.docType else '27'
         with open(file_name, 'wb') as f:

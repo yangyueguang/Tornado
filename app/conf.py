@@ -11,10 +11,10 @@ def full_url(host, port):
 
 TORNADO_LISTEN_PORT = os.getenv('LISTEN_PORT', 8000)
 CURRENT_PATH = os.path.dirname(os.path.abspath(__file__))
-LOG_PATH = os.path.join(CURRENT_PATH, 'static')
+STATIC_PATH = os.path.join(CURRENT_PATH, 'static')
+LOG_PATH = os.path.join(STATIC_PATH, 'root.log')
 LOGIN_HOST = full_url('EXTRACT_HOST', 'EXTRACT_PORT')
 RELOGIN_INTERVAL = 300
-EXCEL_PATH = LOG_PATH
 # user info
 USER_INFO = {
     'username': 'admin',
