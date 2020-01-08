@@ -53,7 +53,6 @@ def extract(input_file, doc_type_id):
 
 def translate_response(res):
     field_config = {}
-    aaa = os.path.abspath(__file__)
     try:
         with open('utils/field_config.json', 'r') as f:
             field_config = json.loads(f.read())
@@ -94,6 +93,7 @@ def translate_response(res):
             }
             extracts.append(extract_item)
     if len(workbook.sheetnames) > 1:
+        workbook.remove(workbook['Sheet'])
         workbook.save(pdf_file_path + '.xlsx')
     result = {
         "history_id": res['history_id'],
@@ -114,6 +114,6 @@ def xls_save(data, file_name, sheet_name):
     sheet = workbook.add_sheet(sheet_name)
     for row, item in enumerate(data):
         for col, value in enumerate(item):
-            sheet.write(row + 1, col + 1, value)
+            sheet.write(row, col, value)
     workbook.save(file_name)
 
