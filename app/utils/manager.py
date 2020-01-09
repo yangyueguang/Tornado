@@ -93,7 +93,7 @@ def translate_response(res, path, field_config):
         "pdf_path": json_result['pdf_path'],
         "result": {
             "extract": extracts,
-            "tables": tables
+            # "tables": tables
         }
     }
     return result
