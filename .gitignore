@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 app/static
+!app/static/field_config.json
 # C extensions
 *.so
 .idea

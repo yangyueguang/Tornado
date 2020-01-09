@@ -5,6 +5,7 @@ import time, os, stat
 import traceback
 import conf
 import urllib
+import json
 import asyncio
 from utils.manager import extract, translate_response
 from tornado import gen, iostream
@@ -123,6 +124,13 @@ class AsyncDownloadHandler(BaseHandler):
         content_size = stat_result[stat.ST_SIZE]
         return content_size
 
+field_config = {}
+try:
+    with open('static/field_config.json', 'r') as f:
+        field_config = json.loads(f.read())
+except:
+    logger.info('field_config read error')
+
 
 # pdf 抽取
 class Extract(BaseHandler):
@@ -132,11 +140,16 @@ class Extract(BaseHandler):
         if not request_file:
             self.send_status_message(301, 'file param is required!')
             return
-        file_name = os.path.join(conf.STATIC_PATH, request_file[0]['filename'])
+        name = request_file[0]['filename']
+        file_path = os.path.join(conf.STATIC_PATH, name.split('.')[0])
+        if not os.path.exists(file_path):
+            os.makedirs(file_path)
+        file_name = os.path.join(file_path, name)
         file_body = request_file[0]['body']
         docType = self.body.docType if self.body.docType else '27'
         with open(file_name, 'wb') as f:
             f.write(file_body)
         res = extract(file_name, int(docType))
-        result = translate_response(res)
+        result = translate_response(res, file_path, field_config)
+        # os.remove(file_name)
         self.send_json(result)

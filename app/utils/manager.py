@@ -47,17 +47,10 @@ def extract(input_file, doc_type_id):
     except:
         logger.error('/api/extracting/instant was error!')
     file_data.close()
-    os.remove(input_file)
     return res.json() if res else {}
 
 
-def translate_response(res):
-    field_config = {}
-    try:
-        with open('utils/field_config.json', 'r') as f:
-            field_config = json.loads(f.read())
-    except:
-        logger.info('field_config read error')
+def translate_response(res, path, field_config):
     json_result = res.get('result', {})
     if not json_result:
         return {}
@@ -65,9 +58,6 @@ def translate_response(res):
     extracts = []
     tables_tags = [2, 32, 33, 34, 37, 38, 39]
     ignore_tags = [3, 4, 5, 6, 7]
-    pdf_file_path = json_result['pdf_path']
-    pdf_path, pdf_name = os.path.split(pdf_file_path)
-    pdf_file_path = os.path.join(conf.STATIC_PATH, pdf_name)
     workbook = Workbook()
     for i in json_result['tag_list']:
         item = Dict(i)
@@ -75,7 +65,7 @@ def translate_response(res):
             table_item = json.loads(item.ppr, encoding='utf-8')
             data = table_item['text_matrix']
             excel_name = field_config.get(str(item.tag_id), table_item.get('table_name', ''))
-            excel_path = '%s%s.xls' % (pdf_file_path, excel_name)
+            excel_path = '%s/%s.xls' % (path, excel_name)
             table_item['excel_path'] = excel_path
             table_item['table_name'] = excel_name
             xls_save(data, excel_path, excel_name)
@@ -94,7 +84,7 @@ def translate_response(res):
             extracts.append(extract_item)
     if len(workbook.sheetnames) > 1:
         workbook.remove(workbook['Sheet'])
-        workbook.save(pdf_file_path + '.xlsx')
+        workbook.save(path + '/all.xlsx')
     result = {
         "history_id": res['history_id'],
         "status": json_result['status'],
