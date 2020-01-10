@@ -87,6 +87,12 @@ def translate_response(res, path, field_config):
     if len(workbook.sheetnames) > 1:
         workbook.remove(workbook['Sheet'])
         workbook.save(path + '/all.xlsx')
+        table_item = {
+            'table_id': '',
+            'table_name': 'all',
+            'excel_path': path + '/all.xlsx'
+        }
+        tables.append(table_item)
     result = {
         "history_id": res['history_id'],
         "status": json_result['status'],
