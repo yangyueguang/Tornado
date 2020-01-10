@@ -1,7 +1,7 @@
 version: '3'
 services:
   output_extract:
-    image: dockerhub.datagrand.com/idps/output_extract:2020011010
+    image: dockerhub.datagrand.com/idps/output_extract:2020011018
     restart: always
     ports:
       - 8082:8082
