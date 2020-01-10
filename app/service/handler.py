@@ -137,19 +137,38 @@ class Extract(BaseHandler):
     @gen.coroutine
     def post(self):
         request_file = self.request.files.get('file', None)
+        error_message = ''
         if not request_file:
-            self.send_status_message(301, 'file param is required!')
+            error_message = 'file is required!'
+        elif not self.body.docType:
+            error_message = 'docType is required!'
+        elif not self.body.id:
+            error_message = 'id is required!'
+        if error_message:
+            self.send_status_message(301, error_message)
             return
         name = request_file[0]['filename']
+        file_body = request_file[0]['body']
+        if not name.endswith('.pdf'):
+            self.send_status_message(302, '仅支持pdf类型文件!')
+            return
+        elif not file_body:
+            self.send_status_message(303, '文件为空、文件读取失败!')
+            return
         file_path = os.path.join(conf.STATIC_PATH, name.split('.')[0])
         if not os.path.exists(file_path):
             os.makedirs(file_path)
         file_name = os.path.join(file_path, name)
-        file_body = request_file[0]['body']
-        docType = self.body.docType if self.body.docType else '27'
         with open(file_name, 'wb') as f:
             f.write(file_body)
-        res = extract(file_name, int(docType))
-        result = translate_response(res, file_path, field_config)
+        res = extract(file_name, int(self.body.docType))
+        if not res:
+            self.send_status_message(304, '抽取服务调用失败!')
+            return
+        json_result = res.get('result', {})
+        if not json_result:
+            self.send_status_message(305, '文档转化失败!')
+            return
+        result = translate_response(res, file_path, field_config, self.body.id)
         # os.remove(file_name)
         self.send_json(result)
