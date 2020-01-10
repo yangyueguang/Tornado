@@ -68,6 +68,8 @@ def translate_response(res, path, field_config):
             excel_path = '%s/%s.xls' % (path, excel_name)
             table_item['excel_path'] = excel_path
             table_item['table_name'] = excel_name
+            table_item.pop('mask')
+            table_item.pop('text_matrix')
             xls_save(data, excel_path, excel_name)
             tables.append(table_item)
             sheet = workbook.create_sheet(excel_name)
@@ -93,7 +95,7 @@ def translate_response(res, path, field_config):
         "pdf_path": json_result['pdf_path'],
         "result": {
             "extract": extracts,
-            # "tables": tables
+            "tables": tables
         }
     }
     return result
