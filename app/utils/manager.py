@@ -7,6 +7,7 @@ import time
 from utils.xdict import Dict
 import conf
 import os
+from utils.oracle_db import Oracle
 import random
 from utils.dlog import logger
 import json
@@ -120,14 +121,18 @@ def translate_response(res, path, field_config, id):
         }
     }
     try:
-        write_to_oracle(result)
+        write_to_oracle(result, id)
     except:
         result['message'] = '写入数据库失败'
     return result
 
 
 # 写入oracle数据库
-def write_to_oracle(res):
+def write_to_oracle(res, id):
+    # oracle = Oracle()
+    # oracle.insert_record(res, id)
+    # oracle.insert_item(res['result']['extract'], id)
+    # oracle.insert_table(res['result']['tables'], id)
     logger.info(json.dumps(res, ensure_ascii=False, indent=4))
 
 
