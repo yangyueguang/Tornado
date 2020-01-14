@@ -93,7 +93,7 @@ def translate_response(res, path, field_config, id, docType):
             extract_item = {
                 "terms_id": item.terms_id,
                 "terms_name": field_config.get(str(item.terms_id), ''),
-                "word": real_word,
+                "word": real_word.replace('\n', '\\n'),
                 "confidence": real_confidence
             }
             extracts.append(extract_item)
