@@ -52,7 +52,7 @@ def extract(input_file, doc_type_id):
     return res.json() if res else {}
 
 
-def translate_response(res, path, field_config, id):
+def translate_response(res, path, field_config, id, docType):
     json_result = res.get('result', {})
     message = res.get('message', '')
     tables = []
@@ -110,6 +110,7 @@ def translate_response(res, path, field_config, id):
         tables.append(table_item)
     result = {
         "id": id,
+        "docType": docType,
         "history_id": res['history_id'],
         "status": json_result['status'],
         "message": message,
@@ -130,7 +131,7 @@ def translate_response(res, path, field_config, id):
 # 写入oracle数据库
 def write_to_oracle(res, id):
     # oracle = Oracle()
-    # oracle.insert_record(res, id)
+    # oracle.insert_record(res)
     # oracle.insert_item(res['result']['extract'], id)
     # oracle.insert_table(res['result']['tables'], id)
     logger.info(json.dumps(res, ensure_ascii=False, indent=4))

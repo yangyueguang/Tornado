@@ -169,6 +169,6 @@ class Extract(BaseHandler):
         if not json_result:
             self.send_status_message(305, '文档转化失败!')
             return
-        result = translate_response(res, file_path, field_config, self.body.id)
+        result = translate_response(res, file_path, field_config, self.body.id, self.body.docType)
         # os.remove(file_name)
         self.send_json(result)
