@@ -12,15 +12,15 @@ from tornado import gen, iostream
 from .base import BaseHandler
 from service.xnet import XRequest
 from functools import wraps
-from utils.dlog import logger
+from utils.dlog import dlog
 
 
 def is_login(func):
     @wraps(func)
     def with_logging(self, **kwargs):
-        logger.info("--------logger %s" % self.current_user)
+        dlog("--------logger %s" % self.current_user)
         if not self.current_user:
-            logger.info('current user is null, remote ip: %s' % self.request.remote_ip)
+            dlog('current user is null, remote ip: %s' % self.request.remote_ip)
             self.send_status_message(1, u'Not login!')
             return
         return func(self, **kwargs)
@@ -34,7 +34,7 @@ class SyncTestHandler(BaseHandler):
             self.send_status_message(1, u'sync request finished, during 10s sleep.')
             return
         except Exception as e:
-            logger.error(traceback.format_exc())
+            dlog(traceback.format_exc(), True)
 
 
 class AsyncTestHandler(BaseHandler):
@@ -46,7 +46,7 @@ class AsyncTestHandler(BaseHandler):
             self.send_status_message(1, u'Async request finished, during 10s sleep.')
             return
         except Exception as e:
-            logger.error(traceback.format_exc())
+            dlog(traceback.format_exc(), True)
 
 class UserLoginHandler(BaseHandler):
     @gen.coroutine
@@ -62,12 +62,12 @@ class UserLoginHandler(BaseHandler):
                 self.send_status_message(2, u'username, password can not be null.' )
                 return
             response_body = yield user_service.user_validate(params)
-            logger.info("content len: %s" % len(response_body))
+            dlog("content len: %s" % len(response_body))
             cookieid = "cookieid123"
             self.set_secure_cookie('sid', cookieid)
             self.send_status_message(1, "search content len: %s, user cookieid: %s" % (len(response_body), cookieid))
         except Exception as e:
-            logger.error(traceback.format_exc())
+            dlog(traceback.format_exc(), True)
 
 
 class UserVisitHandler(BaseHandler):
@@ -77,7 +77,7 @@ class UserVisitHandler(BaseHandler):
         try:
             self.send_status_message(0, u'login success!')
         except Exception as e:
-            logger.error(traceback.format_exc())
+            dlog(traceback.format_exc(), True)
 
 
 class AsyncDownloadHandler(BaseHandler):
@@ -129,7 +129,7 @@ try:
     with open('static/field_config.json', 'r') as f:
         field_config = json.loads(f.read())
 except:
-    logger.info('field_config read error')
+    dlog('field_config read error', True)
 
 
 # pdf 抽取

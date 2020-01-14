@@ -9,7 +9,7 @@ import conf
 import os
 from utils.oracle_db import Oracle
 import random
-from utils.dlog import logger
+from utils.dlog import dlog
 import json
 import xlwt
 from openpyxl import Workbook
@@ -23,16 +23,16 @@ def auto_login(func):
         global LAST_LOGIN_TIME
         if not LAST_LOGIN_TIME or (time.time() - LAST_LOGIN_TIME) >= conf.RELOGIN_INTERVAL:
             try:
-                logger.info(conf.LOGIN_HOST)
+                dlog(conf.LOGIN_HOST)
                 res = requests.post(conf.LOGIN_HOST + '/api/login', conf.USER_INFO)
                 if res.status_code >= 400:
-                    logger.info('登录失败，请联系达观项目负责人')
+                    dlog('登录失败，请联系达观项目负责人')
                     exit()
                 token = res.json().get('access_token')
                 HEADERS['Authorization'] = 'Bearer ' + token
-                logger.info('got token: %s' % token)
+                dlog('got token: %s' % token)
             except:
-                logger.info('login error')
+                dlog('login error')
             LAST_LOGIN_TIME = time.time()
         return func(*args, **kwargs)
     return wrapper
@@ -47,7 +47,7 @@ def extract(input_file, doc_type_id):
     try:
         res = requests.post(url, data={'docType': doc_type_id}, headers=HEADERS, files={'file': file_data})
     except:
-        logger.error('/api/extracting/instant was error!')
+        dlog('/api/extracting/instant was error!', True)
     file_data.close()
     return res.json() if res else {}
 
@@ -134,7 +134,7 @@ def write_to_oracle(res, id):
     # oracle.insert_record(res)
     # oracle.insert_item(res['result']['extract'], id)
     # oracle.insert_table(res['result']['tables'], id)
-    logger.info(json.dumps(res, ensure_ascii=False, indent=4))
+    dlog(json.dumps(res, ensure_ascii=False, indent=4))
 
 
 def xls_save(data, file_name, sheet_name):

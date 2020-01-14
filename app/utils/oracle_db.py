@@ -3,7 +3,7 @@ import cx_Oracle
 import conf
 import datetime
 from utils.xdict import Dict
-from utils.dlog import logger
+from utils.dlog import dlog
 # https://www.jianshu.com/p/79b92439fbbd
 # 'docker run -d -P -p 1521:1521 -v /Users/supers/Documents/oracle:/home/oracle/data_temp --name oracle_11g  alexeiled/docker-oracle-xe-11g'
 # alexeiled/docker-oracle-xe-11g
@@ -19,7 +19,7 @@ class Oracle(object):
             try:
                 oc = conf.ORACLE_CONF
                 conn_url = "%s:%s/%s" % (oc['host'], oc['port'], oc['service'])
-                logger.info(conn_url)
+                dlog(conn_url)
                 self._conn = cx_Oracle.connect(oc['username'], oc['password'], conn_url, encoding="UTF-8")
                 self._conn.autocommit = True
                 self.cursor = self._conn.cursor()
@@ -27,16 +27,22 @@ class Oracle(object):
                 self.create_table()
                 break
             except Exception as e:
-                logger.error("connect to oracle error: %s", e, exc_info=e)
+                dlog(e, True, exc_info=e)
                 retry -= 1
 
     # 创建表
     def create_table(self):
-        sql = "select count(*) from user_tables where table_name =upper('extract_record');"
-        exist = self.cursor.execute(sql)
-        if exist <= 0:
-            table_sql = open('utils/create_table.sql').read()
-            self.cursor.execute(table_sql)
+        sql = "select count(*) from user_tables where table_name = upper('extract_record')"
+        exist = self.exist(sql)
+        if not exist:
+            self.execute_sql_file('create_table.sql')
+
+    def execute_sql_file(self, file_path):
+        with open(file_path, 'r', encoding='utf-8') as f:
+            sql_list = f.read().split(';')[:-1]
+            for x in sql_list:
+                self.cursor.execute(x)
+                print("执行成功sql: %s" % x)
 
     # query methods
     def queryAll(self, sql):
@@ -61,7 +67,11 @@ class Oracle(object):
         self.commit()
 
     def exist(self, sql):
-        return self.cursor.execute(sql) > 0
+        return self.queryOne(sql)[0] > 0
+
+    def drop_table(self, table_name):
+        sql = 'drop table %s cascade constraints' % table_name
+        self.cursor.execute(sql)
 
     # 插入抽取记录表
     def insert_record(self, params):
@@ -78,7 +88,7 @@ class Oracle(object):
                 r.error_msg = %s,
                 r.update_time	= %s,
                 where r.doc_id = %s;""" % (d.hisotry_id, d.doc_type, d.pdf_path, d.status, d.error_code, d.error_msg, d.update_time, d.doc_id)
-            logger.info(sql)
+            dlog(sql)
             self.update(sql)
         else:
             params['create_time'] = datetime.datetime.now()
@@ -100,7 +110,7 @@ class Oracle(object):
                 r.word = %s,
                 r.confidence = %0.3f
                 where r.doc_id = %s;""" % (d.item_id, d.item_name, d.word, d.confidence, doc_id)
-            logger.info(sql)
+            dlog(sql)
             self.update(sql)
         else:
             params['doc_id'] = doc_id
@@ -118,7 +128,7 @@ class Oracle(object):
         if self.exist(exist_sql):
             sql = """
                 update extract_table t 
-                t.table_id = %s,
+                set t.table_id = %s,
                 t.table_name = %s,
                 t.table_path = %s
                 where t.doc_id = %s;""" % (d.table_id, d.table_name, d.table_path, doc_id)
@@ -180,7 +190,7 @@ if __name__ == '__main__':
         'update_time':	datetime.datetime.now()
     }
     oracle.insert_record(res_dict)
-    for item in extract:
-        oracle.insert_item(item, '2')
-    for item in table:
-        oracle.insert_table(item, '2')
+    # for item in extract:
+    #     oracle.insert_item(item, '2')
+    # for item in table:
+    #     oracle.insert_table(item, '2')
