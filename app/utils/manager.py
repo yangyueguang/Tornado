@@ -46,6 +46,7 @@ def extract(input_file, doc_type_id):
     res = None
     try:
         res = requests.post(url, data={'docType': doc_type_id}, headers=HEADERS, files={'file': file_data})
+        dlog(json.dumps(res.json(), ensure_ascii=False, indent=4))
     except:
         dlog('/api/extracting/instant was error!', True)
     file_data.close()
@@ -134,7 +135,8 @@ def write_to_oracle(res, id):
     # oracle.insert_record(res)
     # oracle.insert_item(res['result']['extract'], id)
     # oracle.insert_table(res['result']['tables'], id)
-    dlog(json.dumps(res, ensure_ascii=False, indent=4))
+    # dlog(json.dumps(res, ensure_ascii=False, indent=4))
+    pass
 
 
 def xls_save(data, file_name, sheet_name):
