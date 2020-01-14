@@ -5,21 +5,22 @@ import time, os, stat
 import traceback
 import conf
 import urllib
+import json
 import asyncio
 from utils.manager import extract, translate_response
 from tornado import gen, iostream
 from .base import BaseHandler
 from service.xnet import XRequest
 from functools import wraps
-from utils.dlog import logger
+from utils.dlog import dlog
 
 
 def is_login(func):
     @wraps(func)
     def with_logging(self, **kwargs):
-        logger.info("--------logger %s" % self.current_user)
+        dlog("--------logger %s" % self.current_user)
         if not self.current_user:
-            logger.info('current user is null, remote ip: %s' % self.request.remote_ip)
+            dlog('current user is null, remote ip: %s' % self.request.remote_ip)
             self.send_status_message(1, u'Not login!')
             return
         return func(self, **kwargs)
@@ -33,7 +34,7 @@ class SyncTestHandler(BaseHandler):
             self.send_status_message(1, u'sync request finished, during 10s sleep.')
             return
         except Exception as e:
-            logger.error(traceback.format_exc())
+            dlog(traceback.format_exc(), True)
 
 
 class AsyncTestHandler(BaseHandler):
@@ -45,7 +46,7 @@ class AsyncTestHandler(BaseHandler):
             self.send_status_message(1, u'Async request finished, during 10s sleep.')
             return
         except Exception as e:
-            logger.error(traceback.format_exc())
+            dlog(traceback.format_exc(), True)
 
 class UserLoginHandler(BaseHandler):
     @gen.coroutine
@@ -61,12 +62,12 @@ class UserLoginHandler(BaseHandler):
                 self.send_status_message(2, u'username, password can not be null.' )
                 return
             response_body = yield user_service.user_validate(params)
-            logger.info("content len: %s" % len(response_body))
+            dlog("content len: %s" % len(response_body))
             cookieid = "cookieid123"
             self.set_secure_cookie('sid', cookieid)
             self.send_status_message(1, "search content len: %s, user cookieid: %s" % (len(response_body), cookieid))
         except Exception as e:
-            logger.error(traceback.format_exc())
+            dlog(traceback.format_exc(), True)
 
 
 class UserVisitHandler(BaseHandler):
@@ -76,7 +77,7 @@ class UserVisitHandler(BaseHandler):
         try:
             self.send_status_message(0, u'login success!')
         except Exception as e:
-            logger.error(traceback.format_exc())
+            dlog(traceback.format_exc(), True)
 
 
 class AsyncDownloadHandler(BaseHandler):
@@ -123,20 +124,51 @@ class AsyncDownloadHandler(BaseHandler):
         content_size = stat_result[stat.ST_SIZE]
         return content_size
 
+field_config = {}
+try:
+    with open('static/field_config.json', 'r') as f:
+        field_config = json.loads(f.read())
+except:
+    dlog('field_config read error', True)
+
 
 # pdf 抽取
 class Extract(BaseHandler):
     @gen.coroutine
     def post(self):
         request_file = self.request.files.get('file', None)
+        error_message = ''
         if not request_file:
-            self.send_status_message(301, 'file param is required!')
+            error_message = 'file is required!'
+        elif not self.body.docType:
+            error_message = 'docType is required!'
+        elif not self.body.id:
+            error_message = 'id is required!'
+        if error_message:
+            self.send_status_message(301, error_message)
             return
-        file_name = os.path.join(conf.STATIC_PATH, request_file[0]['filename'])
+        name = request_file[0]['filename']
         file_body = request_file[0]['body']
-        docType = self.body.docType if self.body.docType else '27'
+        if not name.endswith('.pdf'):
+            self.send_status_message(302, '仅支持pdf类型文件!')
+            return
+        elif not file_body:
+            self.send_status_message(303, '文件为空、文件读取失败!')
+            return
+        file_path = os.path.join(conf.STATIC_PATH, name.split('.')[0])
+        if not os.path.exists(file_path):
+            os.makedirs(file_path)
+        file_name = os.path.join(file_path, name)
         with open(file_name, 'wb') as f:
             f.write(file_body)
-        res = extract(file_name, int(docType))
-        result = translate_response(res)
+        res = extract(file_name, int(self.body.docType))
+        if not res:
+            self.send_status_message(304, '抽取服务调用失败!')
+            return
+        json_result = res.get('result', {})
+        if not json_result:
+            self.send_status_message(305, '文档转化失败!')
+            return
+        result = translate_response(res, file_path, field_config, self.body.id, self.body.docType)
+        # os.remove(file_name)
         self.send_json(result)

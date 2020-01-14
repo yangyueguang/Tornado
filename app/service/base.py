@@ -3,7 +3,7 @@
 
 import time, logging, json, traceback
 from tornado import web
-from utils.dlog import logger
+from utils.dlog import dlog
 from utils.xdict import Dict
 
 
@@ -24,7 +24,7 @@ class BaseHandler(web.RequestHandler):
             user = self.redisdb.get(sid)
             return json.loads(user) if user else {}
         except Exception as e:
-            logger.error(traceback.format_exc())
+            dlog(traceback.format_exc(), True)
 
     def get_current_user(self):
         cookie_userid = self.get_secure_cookie('sid') # get session id.

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import logging
+import logging.handlers
 import sys, os
 import conf
 import colorama
@@ -46,5 +47,12 @@ def Dlog(filename: str, max_bytes=500*1024*1024, stdout=False, backup_count=5):
     return log
 
 
-logger = Dlog(filename=conf.LOG_PATH, stdout=conf.settings['debug'])
-# logger.info('sd')
+logger_obj = Dlog(filename=conf.LOG_PATH, stdout=conf.settings['debug'])
+
+
+def dlog(message, is_error=False, *args, **kwargs):
+    if is_error:
+        logger_obj.error(message, *args, **kwargs)
+    else:
+        logger_obj.info(message, *args, **kwargs)
+
