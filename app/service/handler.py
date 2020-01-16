@@ -149,7 +149,7 @@ class Extract(BaseHandler):
             return
         name = request_file[0]['filename']
         file_body = request_file[0]['body']
-        if not name.endswith('.pdf') or not name.endswith('.doc') or not name.endswith('.docx'):
+        if not (name.endswith('.pdf') or name.endswith('.doc') or name.endswith('.docx')):
             self.send_status_message(302, '仅支持pdf、word类型文件!')
             return
         elif not file_body:
