@@ -115,7 +115,6 @@ def translate_response(res, path, field_config, id, docType):
         "history_id": res['history_id'],
         "status": json_result['status'],
         "message": message,
-        "has_table": True,
         "pdf_path": json_result['pdf_path'],
         "result": {
             "extract": extracts,
