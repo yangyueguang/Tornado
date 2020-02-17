@@ -38,5 +38,6 @@ ORACLE_CONF = {
 
 settings = {
     'debug': True,  #  debug: True 为调试模式， 会自动重载修改过的文件， 上线时需要设置为False, 减小压力
-    'cookie_secret': '95EE8F440B65246FE167615CCB8904B5', # 每一个项目都需要修改一下， 防止加密串重复
+    'cookie_secret': '95EE8F440B65246FE167615CCB8904B5',  # 每一个项目都需要修改一下， 防止加密串重复
+    'static_path': STATIC_PATH
 }
