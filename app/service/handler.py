@@ -6,7 +6,10 @@ import traceback
 import conf
 import urllib
 import json
-import asyncio
+import requests
+from concurrent.futures import ThreadPoolExecutor
+import tornado
+from tornado.concurrent import run_on_executor
 from utils.manager import extract, translate_response
 from tornado import gen, iostream
 from .base import BaseHandler
@@ -38,15 +41,17 @@ class SyncTestHandler(BaseHandler):
 
 
 class AsyncTestHandler(BaseHandler):
+    executor = ThreadPoolExecutor(5)
     @gen.coroutine
     def post(self):
-        try:
-            yield gen.sleep(10)
-            # asyncio.events
-            self.send_status_message(1, u'Async request finished, during 10s sleep.')
-            return
-        except Exception as e:
-            dlog(traceback.format_exc(), True)
+        tornado.ioloop.IOLoop.instance().add_callback(self.sleep)
+        self.send_status_message(200, u'is login!')
+
+    @run_on_executor
+    def sleep(self):
+        time.sleep(5)
+        print("yes")
+
 
 class UserLoginHandler(BaseHandler):
     @gen.coroutine
@@ -134,6 +139,7 @@ except:
 
 # pdf 抽取
 class Extract(BaseHandler):
+    executor = ThreadPoolExecutor(5)
     @gen.coroutine
     def post(self):
         request_file = self.request.files.get('file', None)
@@ -149,12 +155,40 @@ class Extract(BaseHandler):
             return
         name = request_file[0]['filename']
         file_body = request_file[0]['body']
-        if not (name.endswith('.pdf') or name.endswith('.doc') or name.endswith('.docx')):
-            self.send_status_message(302, '仅支持pdf、word类型文件!')
+        if not name.endswith('.pdf'):
+            self.send_status_message(302, '仅支持pdf类型文件!')
             return
         elif not file_body:
             self.send_status_message(303, '文件为空、文件读取失败!')
             return
+        if self.body.is_review:
+            res = self.base_task(file_body, name, True)
+            self.send_json(res)
+        else:
+            res = {
+                "id": self.body.id,
+                "docType": self.body.docType,
+                "status": 200,
+                "message": 'OK',
+            }
+            tornado.ioloop.IOLoop.instance().add_callback(self.consume_task, file_body, name)
+            self.send_json(res)
+
+    @run_on_executor
+    def consume_task(self, file_body, name):
+        result = self.base_task(file_body, name)
+        # result['result'] = {'extract': []}
+        res_json = json.dumps(result, ensure_ascii=False)
+        try:
+            res = requests.post('http://222.66.124.34:9999/DH-api/datagrand/reportParse', json={
+                "id": self.body.id,
+                "parseResult": res_json
+            })
+            dlog(json.dumps(res.json(), ensure_ascii=False, indent=4))
+        except:
+            dlog('DH-api/datagrand/reportParse was error!', True)
+
+    def base_task(self, file_body, name, is_preview=False):
         file_path = os.path.join(conf.STATIC_PATH, name.split('.')[0])
         if not os.path.exists(file_path):
             os.makedirs(file_path)
@@ -170,6 +204,7 @@ class Extract(BaseHandler):
             self.send_status_message(305, '文档转化失败!')
             return
         result = translate_response(res, file_path, field_config, self.body.id, self.body.docType)
-        dlog('request succeed! %s' % result.get('message'))
         # os.remove(file_name)
-        self.send_json(result)
+        return result
+
+
