@@ -1,7 +1,7 @@
 FROM python:3.7
 MAINTAINER xuechao@datagrand.com
-LABEL maintainer="xuechao@datagrand.com"
-LABEL description="guotaijunan project"
+LABEL maintainer="2829969299@qq.com"
+LABEL description="tornado project"
 ENV zip_url="https://download.oracle.com/otn_software/linux/instantclient/195000/instantclient-basic-linux.x64-19.5.0.0.0dbru.zip"
 ENV zip_name="instantclient-basic-linux.x64-19.5.0.0.0dbru.zip"
 RUN mkdir -p /opt/oracle && cd /opt/oracle/ \

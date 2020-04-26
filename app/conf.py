@@ -4,7 +4,7 @@
 import os
 
 def full_url(host, port):
-    real_host = os.getenv(host, 'idps2-gtja.datagrand.cn')
+    real_host = os.getenv(host, '127.0.0.1')
     real_port = os.getenv(port, '80')
     return 'http://{}:{}'.format(real_host, real_port)
 
@@ -18,7 +18,7 @@ RELOGIN_INTERVAL = 300
 # user info
 USER_INFO = {
     'username': 'admin',
-    'password': 'mgZjRYeQVi',
+    'password': '123456',
 }
 # redis conf
 REDIS_CONF = {
@@ -29,7 +29,7 @@ REDIS_CONF = {
 }
 
 ORACLE_CONF = {
-    'host': '100.100.21.163',
+    'host': '127.0.0.1',
     'port': '1521',
     'username': 'system',
     'password': 'oracle',

@@ -1,14 +1,14 @@
 version: '3'
 services:
   output_extract:
-    image: dockerhub.datagrand.com/idps/output_extract:2020011417
+    image: yangyueguang/tornado:2020042615
     restart: always
     ports:
       - 8000:8000
     volumes:
       - ../app/static:/app/static
     environment:
-      - EXTRACT_HOST=idps2-gtja.datagrand.cn
+      - EXTRACT_HOST=127.0.0.1
       - EXTRACT_PORT=80
       - LISTEN_PORT=8000
 

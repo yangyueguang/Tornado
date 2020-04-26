@@ -6,7 +6,9 @@ import traceback
 import conf
 import urllib
 import json
+import threading
 import requests
+from multiprocessing import Process
 from concurrent.futures import ThreadPoolExecutor
 import tornado
 from tornado.concurrent import run_on_executor
@@ -154,57 +156,19 @@ class Extract(BaseHandler):
             self.send_status_message(301, error_message)
             return
         name = request_file[0]['filename']
-        file_body = request_file[0]['body']
-        if not name.endswith('.pdf'):
-            self.send_status_message(302, '仅支持pdf类型文件!')
-            return
-        elif not file_body:
-            self.send_status_message(303, '文件为空、文件读取失败!')
-            return
         if self.body.is_review:
-            res = self.base_task(file_body, name, True)
+            res = translate_response(name)
             self.send_json(res)
         else:
             res = {
-                "id": self.body.id,
-                "docType": self.body.docType,
                 "status": 200,
                 "message": 'OK',
             }
-            tornado.ioloop.IOLoop.instance().add_callback(self.consume_task, file_body, name)
+            tornado.ioloop.IOLoop.instance().add_callback(self.consume_task, name)
+            # Process(target=self.consume_task, args=(name)).start()
+            # threading.Thread(target=self.consume_task, args=(name)).start()
             self.send_json(res)
 
     @run_on_executor
-    def consume_task(self, file_body, name):
-        result = self.base_task(file_body, name)
-        # result['result'] = {'extract': []}
-        res_json = json.dumps(result, ensure_ascii=False)
-        try:
-            res = requests.post('http://222.66.124.34:9999/DH-api/datagrand/reportParse', json={
-                "id": self.body.id,
-                "parseResult": res_json
-            })
-            dlog(json.dumps(res.json(), ensure_ascii=False, indent=4))
-        except:
-            dlog('DH-api/datagrand/reportParse was error!', True)
-
-    def base_task(self, file_body, name, is_preview=False):
-        file_path = os.path.join(conf.STATIC_PATH, name.split('.')[0])
-        if not os.path.exists(file_path):
-            os.makedirs(file_path)
-        file_name = os.path.join(file_path, name)
-        with open(file_name, 'wb') as f:
-            f.write(file_body)
-        res = extract(file_name, int(self.body.docType))
-        if not res:
-            self.send_status_message(304, '抽取服务调用失败!')
-            return
-        json_result = res.get('result', {})
-        if not json_result:
-            self.send_status_message(305, '文档转化失败!')
-            return
-        result = translate_response(res, file_path, field_config, self.body.id, self.body.docType)
-        # os.remove(file_name)
-        return result
-
-
+    def consume_task(self, name):
+        print('hello', name)

@@ -1,10 +1,5 @@
 #!/usr/bin/env bash
-image_path="dockerhub.datagrand.com/idps/output_extract:"$(date +%Y%m%d%H)
-
-function hool_to_web() {
-  ssh -f -p 58422 xuechao@idps-jumper.datagrand.cn -L 10022:10.0.1.20:22 -L 15107:10.0.1.20:15107 -N
-  ssh -f -t -p 58422 xuechao@idps-jumper.datagrand.cn -L 10022:10.0.1.20:22 -L 100.100.21.163:15107:10.0.1.20:15107 -N
-}
+image_path="yangyueguang/tornado:"$(date +%Y%m%d%H)
 
 function build_docker() {
   docker build -t ${image_path} -f Dockerfile . --no-cache
