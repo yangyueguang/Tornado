@@ -10,7 +10,7 @@ RUN mkdir -p /opt/oracle && cd /opt/oracle/ \
  && apt-get update && apt-get install -y libaio1 && apt-get clean
 ENV LD_LIBRARY_PATH /opt/oracle/instantclient_19_5:$LD_LIBRARY_PATH
 
-# 1. install ssh
+# 1. install ssh 这样可以支持远程debug
 RUN apt-get update && apt-get -y install openssh-server
 RUN mkdir -p /var/run/sshd
 RUN echo 'root:root' | chpasswd
